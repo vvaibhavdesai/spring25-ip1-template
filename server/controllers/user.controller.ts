@@ -96,8 +96,19 @@ const userController = () => {
    * @returns A promise resolving to void.
    */
   const deleteUser = async (req: UserByUsernameRequest, res: Response): Promise<void> => {
-    // TODO: Task 1 - Implement the deleteUser function
-    res.status(501).send('Not implemented');
+    const { username } = req.params;
+    if (!username || typeof username !== 'string' || username.trim() === '') {
+      res.status(400).json({ error: 'Invalid or missing username parameter.' });
+      return;
+    }
+
+    const result = await deleteUserByUsername(username);
+
+    if ('error' in result) {
+      res.status(404).json(result);
+    } else {
+      res.status(200).json(result);
+    }
   };
 
   /**
