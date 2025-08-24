@@ -107,8 +107,20 @@ const userController = () => {
    * @returns A promise resolving to void.
    */
   const resetPassword = async (req: UserRequest, res: Response): Promise<void> => {
-    // TODO: Task 1 - Implement the resetPassword function
-    res.status(501).send('Not implemented');
+    const { username, password } = req.body;
+    if (!isUserBodyValid(req)) {
+      res.status(400).json({ error: 'Invalid request body: username and password are required.' });
+      return;
+    }
+    // TODO[Vaibhav] - Weak password improvisation
+
+    const result = await updateUser(username, password);
+
+    if ('error' in result) {
+      res.status(400).json(result);
+    } else {
+      res.status(200).json(result);
+    }
   };
 
   // Define routes for the user-related operations.
