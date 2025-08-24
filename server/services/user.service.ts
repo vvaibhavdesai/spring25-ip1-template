@@ -7,9 +7,28 @@ import { User, UserCredentials, UserResponse } from '../types/types';
  * @param {User} user - The user object to be saved, containing user details like username, password, etc.
  * @returns {Promise<UserResponse>} - Resolves with the saved user object (without the password) or an error message.
  */
-export const saveUser = async (user: User): Promise<UserResponse> =>
-  // TODO: Task 1 - Implement the saveUser function. Refer to other service files for guidance.
-  ({ error: 'Not implemented' });
+export const saveUser = async (user: User): Promise<UserResponse> => {
+  try {
+    // Create a new user document
+    const newUser = new UserModel({
+      username: user.username,
+      password: user.password,
+      dateJoined: user.dateJoined || new Date(),
+    });
+
+    // Save to database
+    const savedUser = await newUser.save();
+
+    // Return SafeUser (without password)
+    const { _id, username, dateJoined } = savedUser;
+    return { _id, username, dateJoined };
+  } catch (err: any) {
+    if (err.code === 11000) {
+      return { error: 'Username already exists' };
+    }
+    return { error: err.message || 'Failed to create user' };
+  }
+};
 
 /**
  * Retrieves a user from the database by their username.
@@ -17,9 +36,21 @@ export const saveUser = async (user: User): Promise<UserResponse> =>
  * @param {string} username - The username of the user to find.
  * @returns {Promise<UserResponse>} - Resolves with the found user object (without the password) or an error message.
  */
-export const getUserByUsername = async (username: string): Promise<UserResponse> =>
-  // TODO: Task 1 - Implement the getUserByUsername function. Refer to other service files for guidance.
-  ({ error: 'Not implemented' });
+  export const getUserByUsername = async (username: string): Promise<UserResponse> => {
+    try {
+      //lean is used to make the query faster it return POJO and not Mongoose document 
+      // note: so the user Obj will not have any getters/setters those are present on mongoose obj
+      const user = await UserModel.findOne({ username }).lean();
+      if (!user) {
+        return { error: 'User not found' };
+      }
+      // Exclude password from result
+      const { _id, dateJoined } = user;
+      return { _id, username, dateJoined };
+    } catch (err: any) {
+      return { error: err.message || 'Failed to retrieve user' };
+    }
+  };
 
 /**
  * Authenticates a user by verifying their username and password.

@@ -16,8 +16,13 @@ const userController = () => {
    * @param req The incoming request containing user data.
    * @returns `true` if the body contains valid user fields; otherwise, `false`.
    */
-  const isUserBodyValid = (req: UserRequest): boolean => false;
-  // TODO: Task 1 - Implement the isUserBodyValid function
+  
+  const isUserBodyValid = (req: UserRequest): boolean => {
+    const { username, password } = req.body;
+    return typeof username === 'string' && username.trim() !== '' &&
+          typeof password === 'string' && password.trim() !== '';
+  };
+
 
   /**
    * Handles the creation of a new user account.
@@ -26,10 +31,20 @@ const userController = () => {
    * @returns A promise resolving to void.
    */
   const createUser = async (req: UserRequest, res: Response): Promise<void> => {
-    // TODO: Task 1 - Implement the createUser function
-    res.status(501).send('Not implemented');
-  };
+    if (!isUserBodyValid(req)) {
+      res.status(400).json({ error: 'Invalid request body: username and password are required.' });
+      return;
+    }
 
+    const { username, password } = req.body;
+    const result = await saveUser({ username, password, dateJoined: new Date() });
+
+    if ('error' in result) {
+      res.status(400).json(result);
+    } else {
+      res.status(201).json(result);
+    }
+  };
   /**
    * Handles user login by validating credentials.
    * @param req The request containing username and password in the body.
@@ -48,9 +63,20 @@ const userController = () => {
    * @returns A promise resolving to void.
    */
   const getUser = async (req: UserByUsernameRequest, res: Response): Promise<void> => {
-    // TODO: Task 1 - Implement the getUser function
-    res.status(501).send('Not implemented');
-  };
+      const { username } = req.params;
+      if (!username || typeof username !== 'string' || username.trim() === '') {
+        res.status(400).json({ error: 'Invalid or missing username parameter.' });
+        return;
+      }
+
+      const result = await getUserByUsername(username);
+
+      if ('error' in result) {
+        res.status(404).json(result);
+      } else {
+        res.status(200).json(result);
+      }
+    };
 
   /**
    * Deletes a user by their username.
