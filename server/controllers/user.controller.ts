@@ -135,7 +135,11 @@ const userController = () => {
   };
 
   // Define routes for the user-related operations.
-  // TODO: Task 1 - Add appropriate HTTP verbs and endpoints to the router
+  router.post('/users', createUser);
+  router.post('/users/login', userLogin);
+  router.get('/users/:username', getUser);
+  router.delete('/users/:username', deleteUser);
+  router.patch('/users/reset-password', resetPassword);
 
   return router;
 };
