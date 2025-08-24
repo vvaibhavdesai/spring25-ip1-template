@@ -52,8 +52,19 @@ const userController = () => {
    * @returns A promise resolving to void.
    */
   const userLogin = async (req: UserRequest, res: Response): Promise<void> => {
-    // TODO: Task 1 - Implement the userLogin function
-    res.status(501).send('Not implemented');
+    if (!isUserBodyValid(req)) {
+      res.status(400).json({ error: 'Invalid request body: username and password are required.' });
+      return;
+    }
+
+    const { username, password } = req.body;
+    const result = await loginUser({ username, password });
+
+    if ('error' in result) {
+      res.status(401).json(result);
+    } else {
+      res.status(200).json(result);
+    }
   };
 
   /**
